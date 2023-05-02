@@ -1,30 +1,32 @@
-% Jack Langille Dalhousie Univ. Dept. of Engineering Mathematics 2023
+% Jack Langille 2023
 % This codes simulates an analog to digital convertor that takes an input
 % signal 'y' and converts it to a binary encoded digital signal using basic
 % uniform quantization. Control parameters include sampling frequency 'fs',
 % converter bit count 'n', input voltage range 'Vmin' and 'Vmax' 
 
 clc; clear all;
+Tmax = 1; % Seconds
 
 % Signal Parameters
 Vmin = 0; % Volts
-Vmax = 5; % Volts
+Vmax = 10; % Volts
 f = 10; % Input frequency (Hz)
+x = linspace(0,Tmax,10000);
+s = Vmax+Vmax*sin(2*pi*f*x-(pi/2));
 
 % Converter Parameters
-n = 4; % Converter bit count
+n = 8; % Converter bit count
 r = 2^n; % Converter resolution
-fs = 100; % Sampling frequency (Hz)
+fs = 50; % Sampling frequency (Hz)
 
 % Simulation/Misc
-Tmax = 5; % Seconds
 Ts = 1/fs; % Sampling time (s)
 D = abs(Vmax-Vmin)/r; % Converter quantization size
 num_rows = Tmax/Ts; 
 
 % Step 1: Sampling
 t = 0:Ts:Tmax-Ts; 
-y = Vmax+Vmax*sin(f*t);
+y = Vmax+Vmax*sin(2*pi*f*t-(pi/2));
 
 % Step 2: Quantization
 k = round((y-Vmin)/D);
@@ -52,7 +54,7 @@ ylabel('Volts (V)')
 title('Quantized Signal')
 
 subplot(3,1,2)
-plot(t,y,'k--')
+plot(x,s,'k--')
 xlabel('Time (s)')
 ylabel('Volts (V)')
 title('Original Signal')
@@ -65,7 +67,6 @@ ylabel('Quantization Error (V)')
 title('Quantization Error')
 saveas(gcf,'signals_error.jpg')
 
-
 % Plot the encoded signal
 figure(3)
 set(gcf,'color','w');
@@ -77,6 +78,6 @@ saveas(gcf,'encoded_signal.jpg')
 
 % Create table of data
 data = table(t', y', k', encoded);
-data.Properties.VariableNames = ["Time (s)","Input Voltage (V)","Quantization Index","Digital Signal"]
+data.Properties.VariableNames = ["Time (s)","Input Voltage (V)","Quantization Index","Digital Signal"];
 % Display table
 disp(data);
