@@ -7,74 +7,64 @@
 clc; clear all;
 Tmax = 1; % Seconds
 
-% Signal Parameters
-Vmin = 0; % Volts
-Vmax = 10; % Volts
-f = 10; % Input frequency (Hz)
-x = linspace(0,Tmax,10000);
-s = Vmax+Vmax*sin(2*pi*f*x-(pi/2));
+% Input Signal Parameters
+Vmin = 0; % Minimum voltage (Volts)
+Vmax = 10; % Maximum voltage (Volts)
+A = Vmax/2; % Signal amplitude 
+f = 10; % Signal frequency (Hz)
+x = linspace(0,Tmax,10000); % Time axis for analog signal
+s = A+A*sin(2*pi*f*x-(pi/2)); % Input analog signal
 
 % Converter Parameters
 n = 8; % Converter bit count
 r = 2^n; % Converter resolution
-fs = 50; % Sampling frequency (Hz)
+fs = 100; % Sampling frequency (Hz)
 
 % Simulation/Misc
 Ts = 1/fs; % Sampling time (s)
-D = abs(Vmax-Vmin)/r; % Converter quantization size
-num_rows = Tmax/Ts; 
+D = abs(Vmax-Vmin)/(r-1); % Converter quantization size
+num_rows = Tmax/Ts; % Number of rows 
 
 % Step 1: Sampling
-t = 0:Ts:Tmax-Ts; 
-y = Vmax+Vmax*sin(2*pi*f*t-(pi/2));
+t = 0:Ts:Tmax-Ts; % Sampling time range
+y = A+A*sin(2*pi*f*t-(pi/2)); % Sampled frequency
 
 % Step 2: Quantization
-k = round((y-Vmin)/D);
-q = k*D + Vmin;
+k = round((y-Vmin)/D); % Shift and scale sampled signal function and round to nearest integer
+q = k*D + Vmin; % Scale k by quantization size and shift up to original signal position 
 
 % Step 3: Encoding
-encoded = dec2bin(k);
+encoded = dec2bin(k); % Create array of binary quantization values
 
-% Plot the sampled signal
+% Plot 
 figure(1)
 set(gcf,'color','w');
+subplot(4,1,1)
 stem(t,y)
 xlabel('Time (s)')
 ylabel('Volts (V)')
 title('Sampled Signal')
-saveas(gcf,'sampled_signal.jpg')
 
-% Plot the quantized and analog signals
-figure(2)
-set(gcf,'color','w');
-subplot(3,1,1)
-stem(t,q,'filled','r')
-xlabel('Time (s)')
-ylabel('Volts (V)')
-title('Quantized Signal')
-
-subplot(3,1,2)
+subplot(4,1,2)
 plot(x,s,'k--')
 xlabel('Time (s)')
 ylabel('Volts (V)')
 title('Original Signal')
 
-subplot(3,1,3)
+subplot(4,1,3)
 E = y - q;
 plot(t,E)
 xlabel('Time (s)')
 ylabel('Quantization Error (V)')
 title('Quantization Error')
-saveas(gcf,'signals_error.jpg')
 
-% Plot the encoded signal
-figure(3)
-set(gcf,'color','w');
+subplot(4,1,4)
 stem(t, k, 'm')  
 xlabel('Time (s)')
-ylabel('Quantization Index (decimal)')
-title('Quantization Index vs. Time')
-saveas(gcf,'encoded_signal.jpg')
+ylabel('Quantization Index')
+title('Quantization Value (decimal)')
+
+saveas(gcf,'signals.jpg')
 
 % Create table of data
 data = table(t', y', k', encoded);
